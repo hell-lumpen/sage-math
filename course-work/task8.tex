@@ -1,0 +1,148 @@
+\section{Упрощение уравнений фигур 2-го порядка в пространстве}
+
+\begin{sagesilent}
+	coefs = [0, 0, 3, -6, 4, 0, -1, -1, 1, -10]
+	a11, a22, a33, a12, a13, a23, a14, a24, a34, a44 = coefs
+	a14 /= 2 
+	a24 /= 2
+	a34 /= 2
+	a12 /= 2
+	a13 /= 2
+	a23 /= 2
+	
+	var("x y z")
+	f_src = a11*x**2 + a22*y**2 + a33*z**2\
+	+ 2*a12*x*y + 2*a13*x*z + 2*a23*y*z\
+	+ 2*a14*x + 2*a24*y + 2*a34*z\
+	+ a44
+	
+	
+	var('x y z')
+	
+	plot_ = implicit_plot3d(f_src, (-10,10), (-10, 10), (-10, 10), plot_points=100)
+	
+	A = Matrix([
+	[a11, a12, a13]
+	, [a12, a22, a23]
+	, [a13, a23, a33]
+	])
+	
+	a = Matrix([[a14], [a24], [a34]])
+	
+	phi_A = A.charpoly()
+	lam = var("lambda_")
+	f = phi_A(lam)
+	
+	ssols = A.eigenvalues()
+	resvec = A.eigenvectors_left()
+	res = []
+	res_vec = []
+	for i, ssol in enumerate(ssols):
+	    res.append(ssol.n(digits=4))
+	    res_vec.append(resvec[i][1])
+	    
+	vectors = []
+	for i in range (3):
+	    vectors.append(res_vec[i][0].n(digits=4) / (sqrt((res_vec[i][0][0].n(digits=4))**2 + (res_vec[i][0][1].n(digits=4))**2 + (res_vec[i][0][2].n(digits=4))**2)))
+	    
+	    
+	S = Matrix([vectors[0], vectors[1], vectors[2]])
+	
+	a_ = S.transpose()*a
+
+	new_f = res[0] * x**2 + res[1] * y**2 + res[2] * z**2 + 2*a_[0][0]*x + 2*a_[1][0] * y + 2* a_[2][0] * z + a44
+	
+	new1_f = res[0] * (x + a_[0][0] / res[0])**2 + res[1] * (y + a_[1][0] / res[1])**2 + res[2] * (z + a_[2][0] / res[2])**2
+	new1_f2 = (a_[0][0])**2 / res[0] + (a_[1][0])**2 / res[1] + (a_[2][0])**2 / res[2] - a44
+	
+	new1_f = new1_f / new1_f2
+	var('X Y Z')
+	kanon_f = new1_f(x = X - a_[0][0] / res[0], y = Y - a_[1][0] / res[1], z = Z - a_[2][0] / res[2])	
+	
+	new_plot = implicit_plot3d(kanon_f - 1, (-10,10), (-10, 10), (-10, 10), plot_points=100)
+	
+	    
+\end{sagesilent}
+
+Дана функции $u(x, y, z) = \sage{f_src}$
+\begin{center}
+	\sageplot[clip, width=14cm]{plot(plot_)}
+\end{center}
+
+Составим матрицу $A$ этой квадратичной формы и столбец коэффициентов
+линейной формы: 
+
+\begin{center}
+	$A = \sage{A}$, $B = \sage{B}$
+\end{center}
+
+Найдем собственные числа матрицы $A$. Характеристический полином:
+\begin{center}
+	$\phi_A = \sage{f}$
+\end{center}
+
+Корни характеристического полинома --- собственные числа матрицы $A$:
+\begin{center}
+	$\lambda_0 = \sage{res[0]}, \lambda_1 = \sage{res[1]}, \lambda_2 = \sage{res[2]}$
+\end{center}
+
+Найдем взаимно перпендикулярные единичные собственные векторы $s_1, s_2, s_3$, соответствующие собственным числам, и составим из них матрицу $S = (s_1|s_2|s_3).$ Так как все собственные числа простые, поэтому для каждого корня найдем ненулевое решение однородной СЛАУ $(A− \lambda_iE)l_i = 0$, для каждого $i = 0, 1, 2$.
+\begin{center}
+	$v_0 = \sage{res_vec[0][0].n(digits=4)}$;
+	
+	$v_1 = \sage{res_vec[1][0].n(digits=4)}$;
+	
+	$v_2 = \sage{res_vec[2][0].n(digits=4)}$. 
+\end{center}
+
+Нормируем векторы. Чтобы нормировать вектор, разделим координаты вектора на его
+модуль.
+\begin{center}
+	$v_0 = \sage{vectors[0]}$;
+	
+	$v_1 = \sage{vectors[1]}$;
+	
+	$v_2 = \sage{vectors[2]}$. 
+\end{center}
+
+Составим матрицу из векторов для перехода к новому базису:
+\begin{center}
+    $S = \sage{S}$
+\end{center}
+
+Вычислить столбец коэффициентов линейной формы $a'=S^Ta$
+\begin{center}
+	$a' = \sage{a_}$
+\end{center}
+
+Составим уравнение <<почти>> канонического вида:
+\begin{center}
+	$f(x, y, z) = \lambda_0(x)^2+\lambda_1(y)^2+\lambda_2(z)^2+ 2a'_0 x + 2a'_1 y+ 2a'_2 z+a.$
+	~\\
+	~\\
+	$u(x, y, z) = \sage{new_f}.$
+\end{center}
+
+Дополним до полного квадрата линейные и квадратичные члены, перенесем вправо свободные члены и разделим все уравнение на правую часть, чтобы справа оставалась $1$:
+\begin{center}
+	$\lambda_0(x + \frac{a'_0}{\lambda_0})^2 + \lambda_1(y + \frac{a'_1}{\lambda_1})^2 + \lambda_2(z + \frac{a'_2}{\lambda_2})^2 = \frac{(a'_0)^2}{\lambda_0} + \frac{(a'_1)^2}{\lambda_1} + \frac{(a'_2)^2}{\lambda_2} - a$
+	~\\
+	~\\
+	$\sage{new1_f} = \sage{new1_f2}$
+	~\\ 
+	~\\
+	$\sage{new1_f} = 1$
+\end{center}
+
+Теперь заменим значения в скобках на соответствующие переменные $X, Y, Z$. Получим канонический вид заданного уравнения фигуры второго порядка:
+
+\begin{center}
+
+	$\sage{kanon_f} = 1$
+
+	Фигура, построенная по каноническому уравнению:
+
+	\sageplot[clip, width=14cm]{plot(new_plot)}
+\end{center}
+
+
