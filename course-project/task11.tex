@@ -1,0 +1,188 @@
+\section{Линейный оператор и базисы}
+
+\begin{sagesilent}
+def to_x(_z, _a):
+    return _z - _a/3
+\end{sagesilent}
+
+\begin{sagesilent}
+import copy as cp
+A = Matrix([[2, 0, -1], [1, 1, -1], [-1, 0, 2]])
+B = Matrix([[0], [0], [0]])
+R.<x> = QQ[]
+phi_A = det(A - x*identity_matrix(3)).monic()
+# метод Кардано для поиска собственных чисел
+x, a, b, c, d = var("x", "a", "b", "c", "d")
+a = 1
+b = -5
+c = 7
+d = -3
+y = a*x**3 + b*x**2 + c*x + d;
+var("p", "q")
+p = (3*a*c - b**2)/(3*a**2)
+q = ((2*b**3)/(27*a**3)) - ((b*c)/(3*a**2))+ (d/a)
+Q = ((p/3)**3) + ((q/2)**2)
+alpha = ((-q/2) + sqrt(Q))**(1/3)
+beta = ((-q/2) - sqrt(Q))**(1/3)
+epsilon = -1/2 + (sqrt(-3))/2
+
+res = [alpha + beta
+, alpha*epsilon + beta*epsilon**2
+, beta*epsilon + alpha*epsilon**2
+]
+
+result_phi = []
+result_matrix = []
+vectors = []
+result_vectors = []
+
+for i, z_i in enumerate(res):
+    x_i = to_x(_z = z_i, _a = b/a)
+    result_phi.append(x_i.n(digits=2).real())
+
+
+for i, lam1 in enumerate(result_phi):
+    mat = A - (identity_matrix(3) * lam1)
+    mat = mat.echelon_form()
+    result_matrix.append(mat)
+
+for i, lam1 in enumerate(result_phi):
+    vectors.append(result_matrix[i].right_kernel().basis())
+    result_vectors.append(vectors[i][0])
+
+new_basis = Matrix([[1, 1, 0], [1, -1, 1], [0, 1, -1]])
+new_basis_result = []
+for i, lam1 in enumerate(result_vectors):
+    new_basis_result.append(new_basis.inverse() * result_vectors[i])
+    
+S = Matrix([[1, 1, -1], [1, 0, 1], [0, 1, 0]])
+S = S.transpose()
+v2 = Matrix(QQ, [0.00, 1.0, 0.00])
+A = Matrix([[2,0,-1],[1,1,-1],[-1,0,2]])
+J = S.inverse() * A * S
+J_sage = A.jordan_form()
+
+M = (J * A.inverse()).inverse()
+
+coefficients_ = phi_A.coefficients()
+for i in range(4):
+    coefficients_[i] = coefficients_[i] * -1
+    
+A1 = (coefficients_[3]*A**2 + coefficients_[2]*A + coefficients_[1]*identity_matrix(3))/-coefficients_[0]
+A3 = coefficients_[2]*A*A + coefficients_[1]*A + coefficients_[0]
+
+
+\end{sagesilent}
+
+Линейный оператор A задан в каноническом базисе матрицей.
+\begin{equation*}
+	A = \sage{A}
+\end{equation*}
+
+Найдем собственные числа матрицы, решив методом Кардано характеристическое уравнение:
+
+\begin{center}
+	$\phi_A = \sage{phi_A};$
+	
+    $x_0 = \sage{result_phi[0]};$
+    
+	$x_1 = \sage{result_phi[1]};$
+	
+	$x_2 = \sage{result_phi[2]}.$
+\end{center}
+
+Приведем получившиеся матрицы к ступенчатому виду, чтобы найти собственные векторы $A$.
+
+\begin{center}
+	$A_{\lambda_0} = \sage{result_matrix[0]};$
+	отсюда собственный вектор $\sage{result_vectors[0]}$
+	
+	$A_{\lambda_1} = \sage{result_matrix[1]};$
+	отсюда собственный вектор $\sage{result_vectors[1]}$
+	
+	$A_{\lambda_2} = \sage{result_matrix[2]};$
+	отсюда собственный вектор $\sage{v2}$
+\end{center}
+
+Найдем найденные собственные векторы в базисе $B = \sage{new_basis}$. Для этого воспользуемся формулой:
+
+\begin{center}
+	$V' = B^{-1}  V$
+	
+	$V'_{\lambda_0} = \sage{new_basis_result[0]}$
+	
+	$V'_{\lambda_1} = \sage{new_basis_result[1]}$
+
+	$V'_{\lambda_2} = \sage{(new_basis.inverse() * v2.transpose()).transpose()}$
+\end{center}
+
+Жордановой матрицей называют блочно-диагональную матрицу, на диагонали которой стоят жордановы клетки.
+
+Составим матрицу из собственных векторов.
+\begin{center}
+	$S = \sage{S}$
+\end{center}
+
+Для перехода к жордановой форме транспонируем $S$ и воспользуемся формулой:
+\begin{center}
+	$J = S^TAS$
+\end{center}
+
+Отсюда жорданова форма матрицы $A$:
+\begin{center}
+ 	$J = \sage{J}$
+\end{center} 
+
+Найдем матрицу перехода от матрицы $A$ к жорданову базису 
+~\\
+воспользовавшись формулой:
+
+\begin{center}
+	$M = (BA^{-1})^{-1}$
+\end{center}
+
+Исходя из этого матрица перехода к жордановой форме:
+
+\begin{center}
+	$M_J = (JA^{-1})^{-1} = \sage{M}$
+\end{center}
+
+Вычислим $A^{-1}$ и $A^3$ по теореме Кэли - Гамильтона.
+
+Теорема Кэли - Гамильтона утверждает, что любая квадратная матрица удовлетворяет своему характеристическому уравнению, и как следствие,
+~\\
+ обуславливает существование аннулирующего многочлена. Выпишем
+~\\ 
+характеристическое 
+уравнение:
+\begin{center}
+	$\phi_A = \sage{phi_A}$, откуда следует, что
+	
+	$A^3 = 5A^2 - 7A + 3E$
+\end{center}
+
+Вычисляя $A^2$ как $A*A$ и суммируя с остальными слагаемыми, получаем:
+\begin{center}
+	$A^3 = \sage{5*A*A} - \sage{7*A} + \sage{3*identity_matrix(3)}$;
+	
+	$A^3 = \sage{5*A*A - 7*A + 3*identity_matrix(3)}$
+\end{center}
+~\\
+~\\
+
+Чтобы вычислить $A^{-1}$ домножим слева все уравнение на  $A^{-1}$:
+
+\begin{center}
+		$A^3 - 5A^2 + 7A - 3E = 0 $ $\vert$ $\cdot A^{-1}$
+		~\\
+		$A^2 - 5A + 7E - 3A^{-1} = 0$
+		~\\
+		$A^{-1} = (A^2 - 5A + 7E) / 3$
+		~\\
+		~\\
+		$A^{-1} = (\sage{A*A} - \sage{5*A} + \sage{7*identity_matrix(3)}) / 3$
+		~\\
+		~\\
+		$A^{-1} = \sage{(A*A - 5*A + 7*identity_matrix(3)) / 3}$
+\end{center}
+

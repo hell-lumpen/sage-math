@@ -1,0 +1,106 @@
+\section{Численные методы — Метод касательных}
+\begin{sagesilent}
+def newton(f, a, b):
+    x1 = a
+    x2 = (a + b) / 2
+    df = f.derivative()
+    while abs(x2 - x1) >= 0.0000001:
+        x1 = x2
+        x2 = x1 - f(x=x1)/df(x=x1)
+    return x1
+\end{sagesilent}
+
+\begin{sagesilent}
+func = (x**2 + 3*cos(1/2*x**2) - 1) / (3*x) - 1/3
+
+x_1 = newton(func, 1.5, 2.0)
+x_2 = newton(func, 2.8, 2.9)
+
+p1 = plot(func, xmin = 1, xmax = 3)
+p1 += point((x_1, 0), color="red", size=30, zorder=20)
+p1 += point((x_2, 0), color="red", size=30, zorder=20)
+
+x, y = var("x,y")
+x1 = 1.5
+x2 = (1.5 + 2.0)/2
+grafic1 = plot(p1)
+df = func.derivative()
+df2 = df.diff(x)
+
+tangent1 = []
+while abs(x2 - x1) >= 0.0000001:
+    x1 = x2
+    x2 = x1 - func(x=x1) / df(x=x1)
+    l = df(x1)*(x - x1) + func(x=x1)
+    i = 2
+    if i:
+        tangent1.append(plot(l, xmin = 1, xmax = 3, color="red") + text((r"$y={}$" + "\n" + r"$x_1={}, x_2={}$").format(latex(l), x1, x2), (2, -1), fontsize=12, color="black"))
+        i -= 1
+   
+x1 = 2.8
+x2 = (2.8 + 2.9)/2
+df = func.derivative()
+
+tangent2 = []
+while abs(x2 - x1) >= 0.0000001:
+    x1 = x2
+    x2 = x1 - func(x=x1) / df(x=x1)
+    l = df(x1)*(x - x1) + func(x=x1)
+    i = 2
+    if i:
+        tangent2.append(plot(l, xmin = 1, xmax = 3, color="red") + text((r"$y={}$" + "\n" + r"$x_1={}, x_2={}$").format(latex(l), x1, x2), (2, -1), fontsize=12, color="black"))
+        i -= 1
+\end{sagesilent}
+
+Метод касательных (метод Ньютона) предназначен для приближенного нахождения нулей функции.
+
+Чтобы численно решить уравнение $f(x)=0$ методом простой итерации, его необходимо привести к эквивалентному уравнению: $x=\varphi(x)$, где $\varphi$  — сжимающее отображение.
+
+Для наилучшей сходимости метода в точке очередного приближения $x^*$ должно выполняться условие $\varphi '(x^*)=0$. Решение данного уравнения ищут в виде $\varphi (x)=x+\alpha (x)f(x)$, тогда:
+
+$\varphi '(x^{*})=1+\alpha '(x^{*})f(x^{*})+\alpha (x^{*})f'(x^{*})=0.$
+
+В предположении, что точка приближения «достаточно близка» к корню $\tilde  {x}$ и что заданная функция непрерывна $(f(x^{*})\approx f({\tilde {x}})=0)$, окончательная формула для $\alpha(x)$ такова:
+
+$\alpha (x)=-{\frac {1}{f'(x)}}$.
+
+С учётом этого функция $\varphi (x)$ определяется:
+
+$\varphi (x)=x-{\frac {f(x)}{f'(x)}}.$
+
+При некоторых условиях эта функция в окрестности корня осуществляет сжимающее отображение.
+
+Дана функция $f(x) = \sage{func}$. Вычислить с помощью метода Ньютона корни соответствующего уравнения.
+
+\sageplot[width=10cm]{plot(func, 1, 3)}
+
+Запустим два раза метод Ньютона для двух окрестностей. Первая точка будет $x = 2$, а вторая $x = 2.5$. Приближенно получили $x_1 = \sage{x_1.n(digits=6)}$, $x_2 = \sage{x_2.n(digits=6)}$
+\newpage
+\textbf{Несколько итераций алгоритма для каждого корня:}
+~\\
+\sageplot[width=8.5cm]{grafic1 + tangent1[0]}
+\sageplot[width=8.5cm]{grafic1 + tangent2[0]}
+~\\
+\sageplot[width=8.5cm]{grafic1 + tangent1[1]}
+\sageplot[width=8.5cm]{grafic1 + tangent2[1]}
+~\\
+Проверим условия сходимости метода Ньютона с помощью теоремы Кантаровича.
+
+$\frac{1}{f'(x)} < A$ (условие того, что $f'(x)$ существует и не равна 0;)
+
+$\frac{f(x)}{f'(x)} < B$ (условие того, что $f(x)$ ограничена;)
+
+$\exists f''(x)$ и $|f''(x)| \leqslant C \leqslant \frac{1}{2AB}$;
+
+Проверим все вышеупомянутые условия:
+\begin{center}
+	$A = \frac{1}{f'(2)} = \sage{abs(1/df(x = 2)).n(digits = 4)}$
+	
+	$B = \frac{f(2)}{f'(2)} = \sage{abs(func(x = 2)/df(x = 2)).n(digits = 4)}$
+	
+	$C = |f''(x)| = \sage{abs(df2(x = 2)).n(digits = 4)}$
+	
+	$C \leqslant \frac{1}{2AB}$
+	
+	$\sage{abs(df2(x = 2)).n(digits = 4)} \leqslant \sage{(1 / (2 * abs(1/df(x = 2)) * abs(func(x = 2)/df(x = 2)))).n(digits = 4)}$ --- значит метод Ньютона применим.
+\end{center}

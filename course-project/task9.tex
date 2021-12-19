@@ -1,0 +1,129 @@
+\section{Численные методы — Интегралы}
+
+\begin{sagesilent}
+	import numpy
+	var("x")
+	
+	y = (8*x - arctan(2*x)) / (4*x**2 + 1)
+	a = 0 # нижний предел
+	b = e # верхний предел
+	
+	plot1 = plot(y, a, b)
+	
+	fill_plot1 = plot(y, a, b, fill = True, fillcolor = "red", title = "Необходимо найти площадь закрашенной фигуры")
+	
+	# метод прямоугольников
+	
+	dx = 0.1 # приращение x
+	
+	graph_rectangle = plot(y, a, b)
+	result_rectangle = 0
+	rectangles = []
+	iteration_rect = []
+	
+	for i, xi in enumerate(numpy.arange(a, b , dx)):
+	    dy = y(xi) # приращение y
+	    result_rectangle += dx*dy; # площадь маленького прямоугольника из которых будет состоять общая площадь
+	
+	    text_ = text(r"$i={}, curr={}, result={}$".format(i, str((dx*dy).n(digits=4)),str(result_rectangle.n(digits=4))), (1,-0.5), fontsize=12, color="black")
+	
+	    rectangles.append(
+	        polygon2d([(xi, 0),
+	        (xi + dx, 0),
+	        (xi + dx, dy),
+	        (xi, dy)])
+	        )
+	    graph_rectangle += plot(rectangles[-1])
+
+	    if (i < 5):
+	        iteration_rect.append(graph_rectangle)
+	    
+	
+# метод трапеций
+
+dx_ = 0.3
+
+graph_trapezoid = plot(y, a, b)
+result_trapezoid = 0
+trapezoids = []
+iteration_trap = []
+
+
+for i, xi in enumerate(numpy.arange(a, b , dx_)):
+    dy1 = y(xi)
+    dy2 = y(xi + dx_)
+    result_trapezoid += (dy1 + dy2) / 2 * dx_ # площадь маленькой трапеции из которых будет состоять общая площадь
+
+    trapezoids.append(
+        polygon2d([(xi, 0),
+        (xi + dx_, 0),
+        (xi + dx_, dy2),
+        (xi, dy1)])
+    )
+
+    graph_trapezoid += plot(trapezoids[-1])
+
+    if i < 5:
+        iteration_trap.append(graph_trapezoid)
+
+result_sage, e = numerical_integral(y, a, b)
+
+\end{sagesilent}
+
+\begin{minipage}{0.4\textwidth}
+	Найти площадь закрашенной фигуры методом трапеций и прямоугольников. Площадь численно равна интегралу:
+	$\int\limits_{\sage{a}}^{\sage{b}} \sage{y} dx$.
+\end{minipage}
+\hfill
+\begin{minipage}{0.4\textwidth}
+	\sageplot[width=7cm]{plot(fill_plot1)}
+\end{minipage}
+
+\subsection{Метод прямоугольников}
+
+Отрезок интегрирования разбивается на равные части отрезки длины: $\Delta x = \frac{b−a}{n}$. Данная величина называется шагом разбиения. С помощью шага разбиения можно регулировать точность вычисления интеграла. В результате получим точки:
+$x_0 = a < x_1 < x_2 < \dots < x_{n−1} = b$.
+Тогда значение интеграла будет суммой площадей всех маленьких прямоугольников:
+
+\begin{center}
+	$\sum\limits_{i=1}^n  f(x_n)\cdot \Delta x_n$
+
+\sageplot[width=7cm]{plot(iteration_rect[0])}
+\sageplot[width=7cm]{plot(iteration_rect[1])}
+
+\sageplot[width=7cm]{plot(iteration_rect[2])}
+\sageplot[width=7cm]{plot(iteration_rect[3])}
+\end{center}
+
+Значение интеграла полученное методом прямоугольников с шагом разбиения $\sage{dx.n(digits = 2)}$.
+
+\begin{center}
+	$\int\limits_{\sage{a}}^{\sage{b}} \sage{y} dx = \sage{result_rectangle}$.
+\end{center}
+
+\subsection{Метод трапеций}
+
+Отрезок интегрирования разбивается на равные части отрезки длины: $\Delta x = \frac{b−a}{n}$.
+
+Численно интеграл будет равен сумме площадей маленьких прямоугольных трапеций:
+
+\begin{center}
+	$\sum\limits_{i=1}^n  \frac{f(x_n) + f(x_n + \Delta x_n)}{2} \cdot \Delta x_n$
+	
+	\sageplot[width=7cm]{plot(iteration_trap[0])}
+	\sageplot[width=7cm]{plot(iteration_trap[1])}
+	
+	\sageplot[width=7cm]{plot(iteration_trap[2])}
+	\sageplot[width=7cm]{plot(iteration_trap[3])}
+\end{center}
+
+Значение интеграла полученное методом трапеций с шагом разбиения $\sage{dx_.n(digits = 2)}$.
+
+\begin{center}
+	$\int\limits_{\sage{a}}^{\sage{b}} \sage{y} dx = \sage{result_trapezoid}$.
+\end{center}
+
+Результат, полученный встроенными средствами Sage:
+\begin{center}
+	$\int\limits_{\sage{a}}^{\sage{b}} \sage{y} dx = \sage{result_sage}$.
+\end{center}
